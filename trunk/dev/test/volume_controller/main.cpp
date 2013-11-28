@@ -45,37 +45,42 @@ namespace tds {
 	
 TEST( VolumeController, Empty ) 
 {
-	{
-		volume_constant_controller_t volume_controller( 200, 5 );
+	volume_constant_controller_t volume_controller( 200 );
 
-		EXPECT_EQ( volume_controller.how_much_size_allowed(), 200 );
-		EXPECT_EQ( volume_controller.how_much_tasks_allowed(), 5 );
-	}
+	EXPECT_EQ( volume_controller.how_much_is_allowed(), 200 );
+}
+
+TEST( VolumeController, Factory ) 
+{
+	std::unique_ptr<volume_controller_interface_t> dummy_controller = 
+		volume_controller_factory( dummy, 100 );
+
+	EXPECT_EQ( dummy_controller->how_much_is_allowed(), INT_MAX );
+
+	std::unique_ptr<volume_controller_interface_t> constant_controller = 
+		volume_controller_factory( constant, 100 );
+
+	EXPECT_EQ( constant_controller->how_much_is_allowed(), 100 );
 }
 
 TEST( VolumeController, LoadUnload ) 
 {
-	volume_constant_controller_t volume_controller( 200, 5 );
+	volume_constant_controller_t volume_controller( 200 );
 
 	volume_controller.loaded( 100 );
-	EXPECT_EQ( volume_controller.how_much_size_allowed(), 100 );
-	EXPECT_EQ( volume_controller.how_much_tasks_allowed(), 4 );
+	EXPECT_EQ( volume_controller.how_much_is_allowed(), 100 );
 
 	volume_controller.loaded( 100 );
-	EXPECT_EQ( volume_controller.how_much_size_allowed(), 0 );
-	EXPECT_EQ( volume_controller.how_much_tasks_allowed(), 3 );
+	EXPECT_EQ( volume_controller.how_much_is_allowed(), 0 );
 
 	volume_controller.unloaded( 50 );
-	EXPECT_EQ( volume_controller.how_much_size_allowed(), 50 );
-	EXPECT_EQ( volume_controller.how_much_tasks_allowed(), 4 );
+	EXPECT_EQ( volume_controller.how_much_is_allowed(), 50 );
 
 	volume_controller.unloaded( 100 );
-	EXPECT_EQ( volume_controller.how_much_size_allowed(), 150 );
-	EXPECT_EQ( volume_controller.how_much_tasks_allowed(), 5 );
+	EXPECT_EQ( volume_controller.how_much_is_allowed(), 150 );
 
 	volume_controller.unloaded( 100 );
-	EXPECT_EQ( volume_controller.how_much_size_allowed(), 200 );
-	EXPECT_EQ( volume_controller.how_much_tasks_allowed(), 5 );
+	EXPECT_EQ( volume_controller.how_much_is_allowed(), 200 );
 }
 
 } /* namespace tds */

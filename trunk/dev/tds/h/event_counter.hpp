@@ -41,51 +41,62 @@
 
 namespace tds {
 
-//! Count facts of happaened events (errors, successful actions, ... ) 
-//! of last N of them.
+//! Counts facts that events already happened (errors, successful actions, ... ). 
+/*!
+	Stores facts about last N events, no more.
+
+	Thread-safe.
+*/
 class event_counter_t
 {
 	public:
 		event_counter_t( 
-			//! Count of events under control (buffer size).
+			//! Count of maximum events under control (buffer size).
 			unsigned int number );
 
 		//! Event was happened (true/false).
+		/*!
+			true - positive (happened)
+			false - negative.
+		*/
 		void
 		event( bool what );
 
-		//! Get to know count of true-events.
+		//! Get count of true-events.
 		unsigned int 
 		count() const;
 
-		//! Total counted events.
+		//! Total count of happened events.
 		unsigned int 
 		total() const;
 
-		//! Get percentage value.
+		//! Get percentage value of true-events.
+		/*!
+			If there were 0 events, result of this function will be 0.
+		*/
 		float
 		percentage() const;
 
 	private:
 
-		//! Move pointer to the next event.
+		//! Moves pointer to the next event.
 		void
 		next_pointer();
-
-		ACE_Mutex m_event_locker;
 
 		//! Count of the happened events.
 		unsigned int m_count;
 
-		//! Total counted events.
+		//! Total count of happened events.
 		unsigned int m_total;
 
 		//! Pointer to the moving through buffer. 
 		//! Point out to the element which will be changed next time.
 		int m_pointer;
 
-		//! Saves successfulness of all previous events.
+		//! Saves successfulness of all (N) previous events.
 		std::vector <bool> m_store;
+
+		ACE_Mutex m_store_locker;
 };
 
 } /* namespace tds */

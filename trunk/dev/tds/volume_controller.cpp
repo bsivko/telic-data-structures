@@ -45,60 +45,36 @@ namespace tds {
 //
 
 volume_constant_controller_t::volume_constant_controller_t( 
-	unsigned int max_size_in_volume,
-	unsigned int max_tasks_in_volume )
+	unsigned int max_in_volume )
 : 
-	m_max_size_in_volume( max_size_in_volume ), 
-	m_max_tasks_in_volume( max_tasks_in_volume ), 
-	m_total_size_loaded( 0 ), 
-	m_total_tasks_loaded( 0 ) 
+	m_max_in_volume( max_in_volume ), 
+	m_totally_loaded( 0 )
 {}
 
 void
 volume_constant_controller_t::loaded( unsigned int size )
 {
-	m_total_size_loaded += size;
-	++m_total_tasks_loaded;
+	m_totally_loaded += size;
 }
 
 void
 volume_constant_controller_t::unloaded( unsigned int size )
 {
-	if ( size > m_total_size_loaded )
-		m_total_size_loaded = 0;
+	if ( size > m_totally_loaded )
+		m_totally_loaded = 0;
 	else
-		m_total_size_loaded -= size;
-
-	if ( m_total_tasks_loaded > 0 )
-		--m_total_tasks_loaded;
+		m_totally_loaded -= size;
 }
 
 unsigned int
-volume_constant_controller_t::how_much_size_allowed() const
+volume_constant_controller_t::how_much_is_allowed() const
 {
-	if ( m_max_size_in_volume < m_total_size_loaded )
+	if ( m_max_in_volume < m_totally_loaded )
 	{
 		return 0;
 	}
 	else
-		return (m_max_size_in_volume - m_total_size_loaded);
-}
-
-unsigned int
-volume_constant_controller_t::how_much_tasks_allowed() const
-{
-	if ( m_max_tasks_in_volume < m_total_tasks_loaded )
-	{
-		return 0;
-	}
-	else
-		return (m_max_tasks_in_volume - m_total_tasks_loaded);
-}
-
-bool
-volume_constant_controller_t::active() const
-{
-	return true;
+		return (m_max_in_volume - m_totally_loaded);
 }
 
 //
@@ -120,37 +96,24 @@ volume_dummy_controller_t::unloaded( unsigned int size )
 }
 
 unsigned int
-volume_dummy_controller_t::how_much_size_allowed() const
+volume_dummy_controller_t::how_much_is_allowed() const
 {
 	return INT_MAX;
 }
 
-unsigned int
-volume_dummy_controller_t::how_much_tasks_allowed() const
-{
-	return INT_MAX;
-}
-
-bool
-volume_dummy_controller_t::active() const
-{
-	return false;
-}
-
-volume_controller_interface_t *
+std::unique_ptr<volume_controller_interface_t>
 volume_controller_factory( 
 	const volume_controller_type_t & volume_controller_type,
-	unsigned int max_size_in_volume,
-	unsigned int max_packets_in_volume )
+	unsigned int max_in_volume )
 {
 	switch( volume_controller_type )
 	{
 		case dummy:
-			return new volume_dummy_controller_t();
+			return std::unique_ptr<volume_controller_interface_t>( 
+				new volume_dummy_controller_t() );
 		case constant:
-			return new volume_constant_controller_t( 
-				max_size_in_volume,
-				max_packets_in_volume );
+			return std::unique_ptr<volume_controller_interface_t>( 
+				new volume_constant_controller_t( max_in_volume ) );
 		default:
 		{
 			std::stringstream s;

@@ -36,58 +36,45 @@
 #define _TDS__VOLUME_CONTROLLER_HPP__INCLUDED
 
 #include <limits.h>
+#include <memory>
 
 namespace tds {
 
-//! Типы возможных контроллеров.
+//! Types of possible controllers.
 enum volume_controller_type_t
 {
 	dummy,
 	constant
 };
 
-//! Класс интерфейса контроля состояния канала с точки зрения его нагрузки.
+//! Interface of volume controller.
 class volume_controller_interface_t
 {
 	public:
 		virtual
 		~volume_controller_interface_t() {}
 
-		//! В канал отправлено заданное число нагрузки.
+		//! Some size has loaded into volume.
 		virtual void
 		loaded( unsigned int size ) = 0;
 
-		//! Канал был разгружен на заданную нагрузку.
+		//! Some size has unloaded into volume.
 		virtual void
 		unloaded( unsigned int size ) = 0;
 
-		//! Какая нагрузка разрешена каналом.
+		//! How much size is free in volume.
 		virtual unsigned int
-		how_much_size_allowed() const = 0;
-
-		//! Какое количество задач разрешено в канале.
-		virtual unsigned int
-		how_much_tasks_allowed() const = 0;
-
-		//! Активен контроллер или нет.
-		virtual bool
-		active() const = 0;
+		how_much_is_allowed() const = 0;
 };
 
-//! Класс контроля состояния канала с точки зрения его нагрузки.
-/*!
-	Ему передается информация о событиях, 
-	а он сообщает, сколько можно отправить в канал.
-*/
+//! Volume controller of the volume with constant size.
 class volume_constant_controller_t : public volume_controller_interface_t
 {
 	public:
 
 		volume_constant_controller_t( 
-			//! Максимальная нагрузка канала (объем).
-			unsigned int max_size_in_volume,
-			//! Максимальная нагрузка канала (задачи).
-			unsigned int max_tasks_in_volume );
+			//! Max in volume.
+			unsigned int max_in_volume );
 
 		virtual void
 		loaded( unsigned int size );
@@ -96,26 +83,19 @@ class volume_constant_controller_t : public volume_controller_interface_t
 		unloaded( unsigned int size );
 
 		virtual unsigned int
-		how_much_size_allowed() const;
-
-		virtual unsigned int
-		how_much_tasks_allowed() const;
-
-		virtual bool
-		active() const;
+		how_much_is_allowed() const;
 
 	private:
-		//! Насколько канал загружен (объем).
-		unsigned int m_total_size_loaded;
-		//! Насколько канал загружен (задачи).
-		unsigned int m_total_tasks_loaded;
-		//! Сколько максимум может быть в канале (объем).
-		unsigned int m_max_size_in_volume;
-		//! Сколько максимум может быть в канале (задачи).
-		unsigned int m_max_tasks_in_volume;
+		//! How much totally is loaded.
+		/*!
+			 loaded() minus unloaded() in all lifetime.
+		*/
+		unsigned int m_totally_loaded;
+		//! How much may be in volume.
+		unsigned int m_max_in_volume;
 };
 
-//! Контроллер, который не накладывает ограничений (пустышка).
+//! Volume controller with no limits (dummy).
 class volume_dummy_controller_t : public volume_controller_interface_t
 {
 	public:
@@ -129,21 +109,14 @@ class volume_dummy_controller_t : public volume_controller_interface_t
 		unloaded( unsigned int size );
 
 		virtual unsigned int
-		how_much_size_allowed() const;
-
-		virtual unsigned int
-		how_much_tasks_allowed() const;
-
-		virtual bool
-		active() const;
+		how_much_is_allowed() const;
 };
 
-//! Фабрика для производства контроллеров.
-volume_controller_interface_t *
+//! Factory of the volume controllers.
+std::unique_ptr<volume_controller_interface_t>
 volume_controller_factory( 
 	const volume_controller_type_t & volume_controller_type,
-	unsigned int max_size_in_volume,
-	unsigned int max_packets_in_volume );
+	unsigned int max_in_volume );
 
 } /* namespace tds */
 
