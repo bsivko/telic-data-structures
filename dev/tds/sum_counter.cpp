@@ -43,13 +43,13 @@ sum_counter_t::sum_counter_t(
 	m_store( number, false ), m_pointer( 0 ), m_sum( 0 ), m_total( 0 )
 {
 	if (number == 0)
-		throw std::runtime_error( "Null number founad at event_counter c'tor. Must be more than 0." );
+		throw std::runtime_error( "Null number is detected at sum_counter c'tor. Must be more than 0." );
 }
 
 void
 sum_counter_t::event( unsigned int value )
 {
-	// Была замена или нет?
+	// Change had place or not?
 	if ( m_store[m_pointer] != value )
 	{
 		m_sum += value;
@@ -73,9 +73,9 @@ sum_counter_t::total() const
 }
 
 float
-sum_counter_t::medium() const
+sum_counter_t::mean() const
 {
-	if (m_total == 0)
+	if ( m_total == 0 )
 		return 0;
 
 	return static_cast<float>( m_sum ) / m_total;
@@ -85,7 +85,7 @@ void
 sum_counter_t::next_pointer() 
 {
 	if ( m_pointer == 0 )
-		m_pointer = m_store.size()-1;
+		m_pointer = m_store.size() - 1;
 	else
 		--m_pointer;
 

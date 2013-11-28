@@ -41,31 +41,30 @@
 namespace tds {
 
 event_counter_t::event_counter_t( 
-	//! Количество событий контроля (размер буфера).
 	unsigned int number ) : 
 	m_store( number, false ), m_pointer( 0 ), m_count( 0 ), m_total( 0 )
 {
-	if (number == 0)
+	if ( number == 0 )
 		throw std::runtime_error( 
-			"Null number founad at event_counter c'tor. Must be more than 0." );
+			"Null number is detected at event_counter c'tor. Must be more than 0." );
 }
 
 void
 event_counter_t::event( bool what )
 {
-	ACE_Guard<ACE_Mutex> guard( m_event_locker );
+	ACE_Guard<ACE_Mutex> guard( m_store_locker );
 
-	// Была замена или нет?
+	// Change had place or not?
 	if ( m_store[m_pointer] != what )
 	{
 		if ( what )
 		{
-			// Замена false->true.
+			// Change from false to true.
 			++m_count;
 		}
 		else
 		{
-			// Замена true->false.
+			// Change from true to false.
 			--m_count;
 		}
 
@@ -75,25 +74,22 @@ event_counter_t::event( bool what )
 	next_pointer();
 }
 
-//! Узнать количество подсчитанных событий.
 unsigned int 
 event_counter_t::count() const
 {
 	return m_count;
 }
 
-//! Total counted events.
 unsigned int 
 event_counter_t::total() const
 {
 	return m_total;
 }
 
-//! Get percentage value.
 float
 event_counter_t::percentage() const
 {
-	if (m_total == 0)
+	if ( m_total == 0 )
 		return 0;
 
 	return m_count * 100.0 / m_total;
@@ -103,7 +99,7 @@ void
 event_counter_t::next_pointer() 
 {
 	if ( m_pointer == 0 )
-		m_pointer = m_store.size()-1;
+		m_pointer = m_store.size() - 1;
 	else
 		--m_pointer;
 

@@ -47,7 +47,7 @@ TEST( Start, Simple )
 
 	EXPECT_EQ( sum_counter.total(), 0 );
 	EXPECT_EQ( sum_counter.sum(), 0 );
-	EXPECT_FLOAT_EQ( sum_counter.medium(), 0 );
+	EXPECT_FLOAT_EQ( sum_counter.mean(), 0 );
 }
 
 TEST( Start, Null )
@@ -64,11 +64,10 @@ TEST( Overload, AllTen )
 	for( unsigned int i = 0; i < 2*number; ++i )
 	{
 		sum_counter.event( 10 );
-		EXPECT_FLOAT_EQ( sum_counter.medium(), 10 );
+		EXPECT_FLOAT_EQ( sum_counter.mean(), 10 );
 	}
 	ASSERT_EQ( sum_counter.total(), number );
 }
-
 
 TEST( Overload, AllZero )
 {
@@ -79,11 +78,10 @@ TEST( Overload, AllZero )
 	for( unsigned int i = 0; i < 2*number; ++i )
 	{
 		sum_counter.event( 0 );
-		EXPECT_FLOAT_EQ( sum_counter.medium(), 0 );
+		EXPECT_FLOAT_EQ( sum_counter.mean(), 0 );
 	}
 	ASSERT_EQ( sum_counter.total(), number );
 }
-
 
 TEST( Run, Fidelity )
 {
@@ -96,7 +94,7 @@ TEST( Run, Fidelity )
 	for( unsigned int i = 0; i < number; ++i )
 	{
 		sum_counter.event( 1 );
-		EXPECT_FLOAT_EQ( sum_counter.medium(), static_cast<float>(i+1)/number );
+		EXPECT_FLOAT_EQ( sum_counter.mean(), static_cast<float>(i+1)/number );
 	}
 }
 

@@ -39,20 +39,27 @@
 
 namespace tds {
 
-//! Считает суммы заданных событий (траффик, оценка среднего, ... ) 
-//! последних указанных N операций.
+//! Counts sums of special number events (traffic, middle value, ... ) 
+/*!
+	Stores sums about last N events, no more.
+
+	Not thread-safe.
+*/
 class sum_counter_t
 {
 	public:
 		sum_counter_t( 
-			//! Количество событий контроля (размер буфера).
+			//! Count of maximum events under control (buffer size).
 			unsigned int number );
 
-		//! Произошло событие.
+		//! Event was happened (true/false).
+		/*!
+			value - number which describes the event.
+		*/
 		void
 		event( unsigned int value );
 
-		//! Узнать сумму подсчитанных событий.
+		//! Get sum of happened events.
 		unsigned int 
 		sum() const;
 
@@ -60,27 +67,30 @@ class sum_counter_t
 		unsigned int 
 		total() const;
 
-		//! Узнать среднее.
+		//! Get arithmetic mean.
+		/*!
+			(value1 + value2 + .. + valueN) / N
+		*/
 		float
-		medium() const;
+		mean() const;
 
 	private:
 
-		//! Перемещает указатель на следующее событие.
+		//! Moves pointer to the next event.
 		void
 		next_pointer();
 
-		//! Сумма произошедших событий.
+		//! Sum of all happened events.
 		unsigned int m_sum;
 
 		//! Total counted events.
 		unsigned int m_total;
 
-		//! Указатель на перемещение по буферу. 
-		//! Указывает на элемент, подлежащий замене на следующем событии.
+		//! Pointer to the moving through buffer. 
+		//! Point out to the element which will be changed next time.
 		int m_pointer;
 
-		//! Хранит значения предыдущих событий.
+		//! Saves values of all (N) previous events.
 		std::vector <unsigned int> m_store;
 };
 

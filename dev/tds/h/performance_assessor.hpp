@@ -45,7 +45,7 @@ namespace tds {
 
 namespace performance_assessor {
 
-//! Возможные типы assessor'ов.
+//! Possible types of assessor's.
 enum performance_assessor_type_t
 {
 	dummy,
